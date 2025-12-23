@@ -89,32 +89,49 @@ export default function Home() {
                 {/* Subscriptions List */}
                 <div className="grid gap-4">
                     {subscriptions.map(sub => (
-                        <div key={sub.id} className="card card-side bg-base-100 shadow-xl border border-base-content/10 p-5 items-center group hover:bg-base-200/50 transition-all">
-                            <div className="flex flex-1 items-center gap-4">
-                                  <div className="avatar placeholder">
-                                      {/* Added flex, items-center, and justify-center below */}
-                                      <div className="bg-neutral text-neutral-content rounded-full w-12 flex items-center justify-center">
-                                          <span className="text-xl font-bold">
-                                              {sub.name.charAt(0)}
-                                          </span>
-                                      </div>
-                                  </div>
-                                  <div>
-                                    <h3 className="font-bold text-lg flex items-center gap-2">
+                        <div 
+                            key={sub.id} 
+                            className="card bg-base-100 shadow-xl border border-base-content/10 p-5 group hover:bg-base-200/50 transition-all flex flex-col md:flex-row items-center gap-4"
+                        >
+                            <div className="flex flex-1 items-center gap-4 w-full">
+                                <div className="avatar placeholder">
+                                    <div className="bg-neutral text-neutral-content rounded-full w-12 flex items-center justify-center">
+                                        <span className="text-xl font-bold">
+                                            {sub.name.charAt(0)}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="min-w-0">
+                                    <h3 className="font-bold text-lg flex flex-wrap items-center gap-2">
                                         {sub.name} 
-                                        {sub.is_trial === 1 && <div className="badge badge-success badge-outline badge-xs px-2 py-2">TRIAL</div>}
+                                        {Boolean(sub.is_trial) && <div className="badge badge-success badge-outline badge-xs px-2 py-2">TRIAL</div>}
                                     </h3>
-                                    <p className="text-base-content/50 text-sm">Next due: {sub.next_due} • {sub.period}</p>
+                                    <p className="text-base-content/50 text-sm truncate">
+                                        Next due: {typeof sub.next_due === 'string' ? sub.next_due : new Date(sub.next_due).toLocaleDateString('en-GB')} • {sub.period}
+                                    </p>
                                 </div>
                             </div>
                             
-                            <div className="flex items-center gap-8">
-                                <div className="text-right">
-                                    <p className="text-2xl font-mono font-bold text-primary">฿{sub.cost.toFixed(2)}</p>
+                            <div className="flex items-center justify-between w-full md:w-auto md:gap-8 border-t border-base-content/10 pt-4 md:border-0 md:pt-0 mt-2 md:mt-0">
+                                <div className="text-left md:text-right">
+                                    <p className="text-2xl font-mono font-bold text-primary">฿{Number(sub.cost).toFixed(2)}</p>
                                 </div>
-                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onClick={() => { setEditingId(sub.id!); setFormData(sub); setIsFormOpen(true); }} className="btn btn-ghost btn-sm text-info"><Edit2 size={18}/></button>
-                                    <button onClick={() => handleDelete(sub.id!)} className="btn btn-ghost btn-sm text-error"><Trash2 size={18}/></button>
+                                
+                                <div className="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                    <button 
+                                        onClick={() => { setEditingId(sub.id!); setFormData(sub); setIsFormOpen(true); }} 
+                                        className="btn btn-ghost btn-sm text-info"
+                                        aria-label="Edit"
+                                    >
+                                        <Edit2 size={18}/>
+                                    </button>
+                                    <button 
+                                        onClick={() => handleDelete(sub.id!)} 
+                                        className="btn btn-ghost btn-sm text-error"
+                                        aria-label="Delete"
+                                    >
+                                        <Trash2 size={18}/>
+                                    </button>
                                 </div>
                             </div>
                         </div>
