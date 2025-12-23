@@ -44,3 +44,13 @@ services:
       db:
         condition: service_healthy
     # -------------------------
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: always
+    container_name: subzero-tunnel
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+    depends_on:
+      - app
