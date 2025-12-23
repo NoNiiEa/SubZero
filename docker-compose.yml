@@ -1,0 +1,46 @@
+services:
+  # 1. The Database Service
+  db:
+    image: mysql:8.0
+    container_name: subzero-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: subzero_db
+      MYSQL_USER: subzero_user
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      TZ: Asia/Bangkok
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    # --- ADD THIS BLOCK ---
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    # ----------------------
+
+  # 2. Your Application Service
+  app:
+    build: .
+    container_name: subzero-app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: db
+      DB_USER: subzero_user
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: subzero_db
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
+      DISCORD_USER_ID: ${DISCORD_USER_ID}
+      CRON_SECRET: ${CRON_SECRET}
+      NODE_ENV: production
+      TZ: Asia/Bangkok
+    depends_on:
+      db:
+        condition: service_healthy
+    # -------------------------

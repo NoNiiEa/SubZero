@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SubscriptionService } from '@/services/subscription';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
     const authHeader = request.headers.get('authorization');
     const expectedAuth = `Bearer ${process.env.CRON_SECRET}`;

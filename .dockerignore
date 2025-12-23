@@ -1,0 +1,32 @@
+# 1. Dependencies (We install these afresh inside Docker)
+node_modules
+npm-debug.log
+yarn-error.log
+pnpm-debug.log*
+
+# 2. Next.js Build Artifacts
+.next
+out
+build
+dist
+
+# 3. Security & Config (CRITICAL: Do not copy secrets)
+.env
+.env.local
+.env.*
+.git
+.gitignore
+.github
+.vscode
+.idea
+
+# 4. OS System Files
+.DS_Store
+Thumbs.db
+
+# 5. Docker Files (Optional, keeps the image cleaner)
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+mysql-data

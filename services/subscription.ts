@@ -1,42 +1,43 @@
-import { db } from "@/lib/db";
 import { addMonths, addYears, format, parseISO } from 'date-fns';
 import { SubscriptionRepo } from "@/repository/subscription";
 import { Subscription, CreateSubscriptionInput, UpdateSubscriptionInput } from "@/types/subscription";
 import { DiscordService } from "./discord";
 
 export const SubscriptionService = {
-    create(body: CreateSubscriptionInput): Subscription {
-        return SubscriptionRepo.create(body)
+    async create(body: CreateSubscriptionInput): Promise<Subscription> {
+        return await SubscriptionRepo.create(body);
     },
 
-    getAll(): Subscription[] {
-        return SubscriptionRepo.findall()
+    async getAll(): Promise<Subscription[]> {
+        return await SubscriptionRepo.findall();
     },
 
-    getById(id: number): Subscription | undefined {
-        return SubscriptionRepo.findById(id)
+    async getById(id: number): Promise<Subscription | undefined> {
+        return await SubscriptionRepo.findById(id);
     },
 
-    update(id: number, body: UpdateSubscriptionInput): Subscription {
-        return SubscriptionRepo.update(id, body)
+    async update(id: number, body: UpdateSubscriptionInput): Promise<Subscription> {
+        return await SubscriptionRepo.update(id, body);
     },
 
-    delete(id: number): void {
-        return SubscriptionRepo.delete(id)
+    async delete(id: number): Promise<void> {
+        return await SubscriptionRepo.delete(id);
     },
 
     async processDailyRenewals() {
         const today = format(new Date(), 'yyyy-MM-dd');
-        const dueToday = SubscriptionRepo.findByDate(today);
+        
+        const dueToday = await SubscriptionRepo.findByDate(today);
+        
         const processed = [];
 
         for (const sub of dueToday) {
-            const currentPath = parseISO(sub.next_due);
+            const currentPath = new Date(sub.next_due);
             const nextDate = sub.period === 'monthly' 
                 ? format(addMonths(currentPath, 1), 'yyyy-MM-dd')
                 : format(addYears(currentPath, 1), 'yyyy-MM-dd');
 
-            SubscriptionRepo.update(sub.id!, {
+            await SubscriptionRepo.update(sub.id!, {
                 next_due: nextDate,
                 id: sub.id
             });

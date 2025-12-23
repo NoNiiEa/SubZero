@@ -1,35 +1,37 @@
-import Database from 'better-sqlite3';
-import path from 'path';
-import fs from 'fs';
+import mysql from 'mysql2/promise';
 
-
-const dataDir = path.join(process.cwd(), 'data');
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
-}
-
-const dbPath = path.join(dataDir, 'subzero.db');
-
-const globalForDb = global as unknown as { db: Database.Database };
-
-export const db = globalForDb.db || new Database(dbPath, { 
-    verbose: process.env.NODE_ENV === 'development' ? console.log : undefined 
+const pool = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  port: parseInt(process.env.DB_PORT || '3306'),
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME || 'subzero_db',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0,
 });
 
-if (process.env.NODE_ENV !== 'production') globalForDb.db = db;
+export const db = pool;
 
-// Initialize database
-db.exec(`
-  CREATE TABLE IF NOT EXISTS subs (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    cost REAL NOT NULL,
-    currency TEXT DEFAULT 'EUR',
-    period TEXT CHECK(period IN ('monthly', 'yearly')),
-    next_due DATE NOT NULL,
-    is_trial INTEGER DEFAULT 0,
-    discord_sent INTEGER DEFAULT 0,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )
-`);
-
+export async function initDb() {
+  try {
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS subs (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        cost DECIMAL(10, 2) NOT NULL,
+        currency VARCHAR(10) DEFAULT 'THB',
+        period ENUM('monthly', 'yearly') NOT NULL,
+        next_due DATE NOT NULL,
+        is_trial TINYINT(1) DEFAULT 0,
+        discord_sent TINYINT(1) DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    console.log('✅ MySQL Database Initialized');
+  } catch (error) {
+    console.error('❌ Database init failed:', error);
+  }
+}
